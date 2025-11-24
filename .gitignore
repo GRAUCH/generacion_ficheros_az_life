@@ -63,3 +63,6 @@ build/resources/
 *.tar
 *.zip
 *.gz
+
+# Excepción: NO ignorar los JAR dentro de lib/
+!lib/*.jar
