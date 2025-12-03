@@ -22,37 +22,37 @@ public class GenerarResultados {
 	private Properties propiedades;
 	private Properties coberturas;
 	public static final Logger log = Logger.getLogger(GenerarResultados.class);
-	
+
 	public GenerarResultados(Properties propiedades, Properties coberturas) {
 		super();
 		this.propiedades = propiedades;
 		this.coberturas = coberturas;
 	}
-	
-	void generarFichero(List<Expediente> expedientes, String fechaFin){
 
-		try (BufferedWriter ficheroSalidaAux = new BufferedWriter(new FileWriter(propiedades.getProperty("rutaSalida")+fechaFin+propiedades.getProperty("ficheroResultados")))) {
+	void generarFichero(List<Expediente> expedientes, String fechaFin) {
+
+		try (BufferedWriter ficheroSalidaAux = new BufferedWriter(new FileWriter(propiedades.getProperty("rutaSalida") + fechaFin + propiedades.getProperty("ficheroResultados")))) {
 			ficheroSalidaAux.append(procesaCabecera());
 			ficheroSalidaAux.newLine();
 
 			// OBTENEMOS TODAS LAS FECHAS COMPRENDIDAS ENTRE UNA FECHA DE INICIO Y UNA FECHA. ESTAS SON LAS FECHAS PARA CONSULTAR
-			if (expedientes!=null){
-				for (Expediente actual:expedientes) {
+			if (expedientes != null) {
+				for (Expediente actual : expedientes) {
 					log.info("## Tratando expediente candidato " + actual.getCodigoST());
 					ficheroSalidaAux.append(procesarLineaDetalle(actual));
 					ficheroSalidaAux.newLine();
 				}
 			}
-			
+
 		} catch (IOException e) {
 			log.error("Fallo al procesar el fichero. ", e);
 		}
 	}
-	
+
 	private List<Cobertura> crearListaCoberturas() {
 		List<Cobertura> salida = new ArrayList<>();
-		for(Entry<Object, Object> entrada : coberturas.entrySet()) {
-			salida.add(0,new Cobertura((String)entrada.getKey(), (String)entrada.getValue()));
+		for (Entry<Object, Object> entrada : coberturas.entrySet()) {
+			salida.add(0, new Cobertura((String) entrada.getKey(), (String) entrada.getValue()));
 		}
 		return salida;
 	}
@@ -61,29 +61,29 @@ public class GenerarResultados {
 		StringBuilder ficheroSalida = new StringBuilder();
 		List<Cobertura> listaCoberturas = crearListaCoberturas();
 		transformaCoberturas(listaCoberturas, expediente);
-		
-		if (expediente.getCodigoProductoCIA()!=null) {
+
+		if (expediente.getCodigoProductoCIA() != null) {
 			ficheroSalida.append(expediente.getCodigoProductoCIA());
 		}
 		ficheroSalida.append(Constants.SEPARADOR);
-		if (expediente.getNumSolicitud()!=null) {
+		if (expediente.getNumSolicitud() != null) {
 			ficheroSalida.append(expediente.getNumSolicitud());
 		}
 		ficheroSalida.append(Constants.SEPARADOR);
-		if (expediente.getNumPoliza()!=null) {
+		if (expediente.getNumPoliza() != null) {
 			ficheroSalida.append(expediente.getNumPoliza());
 		}
 		ficheroSalida.append(Constants.SEPARADOR);
-		if (expediente.getServicios()!=null) {
+		if (expediente.getServicios() != null) {
 			ficheroSalida.append(dameDescripcionServicio(expediente.getServicios()));
 		}
 		ficheroSalida.append(Constants.SEPARADOR);
-		
+
 		ficheroSalida.append(procesarDetallesCoberturas(listaCoberturas, expediente));
-		
+
 		return ficheroSalida.toString();
 	}
-	
+
 	private String procesarDetallesCoberturas(List<Cobertura> entrada, Expediente expediente) {
 		StringBuilder lineaDetalle = new StringBuilder();
 		StringBuilder resultados = new StringBuilder();
@@ -92,7 +92,7 @@ public class GenerarResultados {
 		StringBuilder exclusiones = new StringBuilder();
 		StringBuilder premios = new StringBuilder();
 
-		for(Cobertura actual: entrada) {
+		for (Cobertura actual : entrada) {
 			resultados.append(mapearResultadoCobertura(actual.getResult())).append(Constants.SEPARADOR);
 			primas.append(checkearValor(actual.getPrima())).append(Constants.SEPARADOR);
 			capitales.append(checkearValor(actual.getCapital())).append(Constants.SEPARADOR);
@@ -100,16 +100,16 @@ public class GenerarResultados {
 			// No sabemos como se agregan las columnas de Premio por tanto agregamos separador.
 			premios.append(Constants.SEPARADOR);
 		}
-		
+
 		lineaDetalle.append(resultados.toString());
 		lineaDetalle.append(primas.toString());
 		lineaDetalle.append(capitales.toString());
 		lineaDetalle.append(exclusiones.toString());
 		lineaDetalle.append(premios.toString());
-		
+
 		return lineaDetalle.toString();
 	}
-	
+
 	private String procesaCabecera() {
 		List<Cobertura> listaCoberturas = crearListaCoberturas();
 		StringBuilder cabecera = new StringBuilder("Prodotto;Proposta;Polizza;Tipologia Ultimo Underwriting;");
@@ -120,24 +120,24 @@ public class GenerarResultados {
 		cabecera.append(procesaTitulo("Premio ", listaCoberturas));
 		return cabecera.toString();
 	}
-	
+
 	private String procesaTitulo(String prefijo, List<Cobertura> coberturas) {
 		StringBuilder salida = new StringBuilder();
-		for(Cobertura actual: coberturas) {
+		for (Cobertura actual : coberturas) {
 			salida.append(prefijo);
 			salida.append(actual.getName());
 			salida.append(Constants.SEPARADOR);
 		}
 		return salida.toString();
 	}
-	
-	private void transformaCoberturas(List<Cobertura> entrada, Expediente expediente){
+
+	private void transformaCoberturas(List<Cobertura> entrada, Expediente expediente) {
 		List<CoberturaExpediente> coberturasExpediente = expediente.getCoberturasExpediente();
-		
-		if (expediente.getCoberturasExpediente()!=null){
-			for(Cobertura actual: entrada) {
-				for (CoberturaExpediente nueva: coberturasExpediente) {
-					if (nueva.getCodigoCobertura().equals(actual.getCode())){
+
+		if (expediente.getCoberturasExpediente() != null) {
+			for (Cobertura actual : entrada) {
+				for (CoberturaExpediente nueva : coberturasExpediente) {
+					if (nueva.getCodigoCobertura().equals(actual.getCode())) {
 						transformaResultado(actual, nueva);
 						break;
 					}
@@ -145,82 +145,91 @@ public class GenerarResultados {
 			}
 		}
 	}
-	
+
 	private String checkearValor(String entrada) {
 		if (entrada != null) {
-			return entrada.replace(",",".");
+			return entrada.replace(",", ".");
 		} else {
 			return "";
 		}
 	}
-	
-	private String mapearResultadoCobertura(String codResultado){
-		
-		if(codResultado != null) {
-			switch(codResultado.trim()){
-				case Constants.R_1 : return Constants.SI;
-				case "2" : return Constants.NO_DISATTIVAZIONE;
-				case "7" : return Constants.NO;
-				case "8" : return Constants.NO;
-				case "9" : return Constants.NO;
-				case "13" : return Constants.NO_DISATTIVAZIONE;
-				case "20" : return Constants.NO;
-				case Constants.R_3 : return Constants.SI_SOVRAPPREMIO;
-				case Constants.R_30 : return Constants.SI_SOVRAPPREMIO;
-				case Constants.R_31 : return Constants.SI_SOVRAPPREMIO;
+
+	private String mapearResultadoCobertura(String codResultado) {
+
+		if (codResultado != null) {
+			switch (codResultado.trim()) {
+				case Constants.R_1:
+					return Constants.SI;
+				case "2":
+					return Constants.NO_DISATTIVAZIONE;
+				case "7":
+					return Constants.NO;
+				case "8":
+					return Constants.NO;
+				case "9":
+					return Constants.NO;
+				case "13":
+					return Constants.NO_DISATTIVAZIONE;
+				case "20":
+					return Constants.NO;
+				case Constants.R_3:
+					return Constants.SI_SOVRAPPREMIO;
+				case Constants.R_30:
+					return Constants.SI_SOVRAPPREMIO;
+				case Constants.R_31:
+					return Constants.SI_SOVRAPPREMIO;
 				// Si viene a Constants.SI hay que dejarlo (porque se ha puesto antes).
-				case Constants.SI : return Constants.SI;
-				default: return "";
+				case Constants.SI:
+					return Constants.SI;
+				default:
+					return "";
 			}
 		} else {
 			return "";
 		}
 	}
-		
+
 	private String dameDescripcionServicio(List<ExpedienteServicio> listaServicios) {
-		// TODO Hay que leer el valor de los codigos de servicio desde los ficheros .properties
-		if (listaServicios != null) {
-			for (int i = 0; i < listaServicios.size(); i++)
-			{
-				if (listaServicios.get(i).getCompanyaServicio() != null && listaServicios.get(i).getCompanyaServicio().getCodigoCompanya() != null)
-				{
-					// Si es PROD
-					if (propiedades.getProperty("codigo_cia").equals("1080"))
-					{
-						switch (listaServicios.get(i).getCompanyaServicio().getCodigoCompanya())
-						{
+		if (listaServicios == null || listaServicios.isEmpty()) {
+			return "";
+		}
+
+		boolean esProd = "1080".equals(propiedades.getProperty("codigo_cia"));
+
+		if (listaServicios.size() == 1) {
+			// Solo hay un servicio
+			if (listaServicios.get(0).getCompanyaServicio() != null && listaServicios.get(0).getCompanyaServicio().getCodigoCompanya() != null && !listaServicios.get(0).getCompanyaServicio().getCodigoCompanya().isEmpty()) {
+
+				String codigo = listaServicios.get(0).getCompanyaServicio().getCodigoCompanya();
+
+				if (codigo != null) {
+					if (esProd) {
+						switch (codigo) {
+							case "002503":
+								return "QUESTIONNAIRE";
 							case "002968":
 								return "MEDICALEXAMINATION";
-							case "002503":
-								return "QUESTIONNAIRE";
-							case "002501":
-							case "002502":
-								return "TELEUNDERWRITING";
 							default:
-								break;
+								return "";
 						}
-					}
-					else // Si es PREPRO
-					{
-						switch (listaServicios.get(i).getCompanyaServicio().getCodigoCompanya())
-						{
+					} else { // PREPRO
+						switch (codigo) {
+							case "002502":
+								return "QUESTIONNAIRE";
 							case "002503":
 								return "MEDICALEXAMINATION";
-							case "002502":
-								return "QUESTIONNAIRE";
-							case "002500":
-							case "002501":
-								return "TELEUNDERWRITING";
 							default:
-								break;
+								return "";
 						}
 					}
 				}
 			}
+				return "";
+			} else {
+				// Más de un servicio => TELEUNDERWRITING
+				return "TELEUNDERWRITING";
 		}
-		return "";
 	}
-	
 	
 	//se transforman todos los resultados para no incluir sobreprimas menos de 50 y sobremortalidades menores de 1
 	private Cobertura transformaResultado(Cobertura cobertura, CoberturaExpediente coberturaExpediente){

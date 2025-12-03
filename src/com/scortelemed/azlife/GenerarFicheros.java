@@ -33,7 +33,7 @@ public class GenerarFicheros implements Serializable {
 
 		try {
 
-			propiedades.load(new FileInputStream("conexionLOCAL.properties"));
+			propiedades.load(new FileInputStream("conexion.properties"));
 			coberturas.load(new FileInputStream("coberturas.properties"));
 			propiedadesMail.load(new FileInputStream("direccionesMail.properties"));
 
